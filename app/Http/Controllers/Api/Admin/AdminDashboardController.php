@@ -40,9 +40,17 @@ class AdminDashboardController extends BaseApiController
     /**
      * 13.4. API: GET /api/admin/stats/storage — Thống kê dung lượng
      */
-    public function storage()
+    public function storage(Request $request)
     {
-        $data = $this->service->storage();
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date', 'date_format:Y-m-d'],
+        ]);
+
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
+
+        $data = $this->service->storage($startDate, $endDate);
         return $this->ok($data);
     }
 

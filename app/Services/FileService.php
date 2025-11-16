@@ -935,10 +935,19 @@ class FileService
 			throw new \App\Exceptions\DomainValidationException('File already deleted');
 		}
 
-		// Mark as deleted (logical trash). Also set deleted_at to allow soft-deletes queries if needed.
-		$file->is_deleted = true;
-		$file->deleted_at = now();
-		$file->save();
+		// Mark as deleted (logical trash) and revoke any shares that reference this file.
+		DB::transaction(function () use ($file) {
+			$file->is_deleted = true;
+			$file->deleted_at = now();
+			$file->save();
+
+			// Remove any receives_shares -> shares for this file
+			$shareIds = DB::table('shares')->where('file_id', $file->id)->pluck('id')->toArray();
+			if (! empty($shareIds)) {
+				DB::table('receives_shares')->whereIn('share_id', $shareIds)->delete();
+				DB::table('shares')->whereIn('id', $shareIds)->delete();
+			}
+		});
 
 		return $file->fresh();
 	}

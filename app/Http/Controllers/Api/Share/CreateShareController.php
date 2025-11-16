@@ -51,6 +51,11 @@ class CreateShareController extends BaseApiController
             return $this->fail('Shareable not found', 404, 'NOT_FOUND');
         }
 
+        // Do not allow creating shares for soft-deleted targets
+        if ((bool) ($shareable->is_deleted ?? false) || ($shareable->deleted_at ?? null) !== null) {
+            return $this->fail('Shareable not found', 404, 'NOT_FOUND');
+        }
+
         if ($shareable->user_id !== $user->id) {
             return $this->fail('Forbidden: you do not own this resource', 403, 'FORBIDDEN');
         }

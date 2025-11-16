@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Share;
 use App\Http\Controllers\Api\BaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\File;
+use App\Models\Folder;
 
 class RemoveUserFromShareController extends BaseApiController
 {
@@ -21,6 +23,20 @@ class RemoveUserFromShareController extends BaseApiController
         $share = DB::table('shares')->where('id', $id)->first();
         if (! $share) {
             return response()->json(['success' => false, 'message' => 'Share not found.'], 404);
+        }
+
+        // If the share's target (file/folder) is soft-deleted, return not found
+        if (! empty($share->file_id)) {
+            $file = File::select('id', 'is_deleted', 'deleted_at')->find($share->file_id);
+            if (! $file || (bool) $file->is_deleted || $file->deleted_at !== null) {
+                return response()->json(['success' => false, 'message' => 'Share not found.'], 404);
+            }
+        }
+        if (! empty($share->folder_id)) {
+            $folder = Folder::select('id', 'is_deleted', 'deleted_at')->find($share->folder_id);
+            if (! $folder || (bool) $folder->is_deleted || $folder->deleted_at !== null) {
+                return response()->json(['success' => false, 'message' => 'Share not found.'], 404);
+            }
         }
 
         // Only owner may remove recipients

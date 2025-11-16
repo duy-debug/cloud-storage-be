@@ -22,7 +22,7 @@ class GetShareController extends BaseApiController
             ->leftJoin('files as f', 'sh.file_id', '=', 'f.id')
             ->leftJoin('folders as fo', 'sh.folder_id', '=', 'fo.id')
             ->where('sh.id', $id)
-            ->selectRaw('sh.id as share_id, sh.shareable_type, COALESCE(f.display_name, fo.folder_name) as shareable_name, sh.created_at, sh.user_id as shared_by_user_id')
+            ->selectRaw('sh.id as share_id, sh.shareable_type, COALESCE(f.display_name, fo.folder_name) as shareable_name, sh.created_at, sh.user_id as shared_by_user_id, sh.file_id, sh.folder_id')
             ->first();
 
         if (! $share) {
@@ -32,6 +32,20 @@ class GetShareController extends BaseApiController
         // Only allow the owner (shared_by) to view details via this endpoint
         if ((int) $share->shared_by_user_id !== (int) $user->id) {
             return response()->json(['message' => 'Share not found.'], 404);
+        }
+
+        // If the target has been soft-deleted, return not found
+        if (! empty($share->file_id)) {
+            $file = \App\Models\File::select('id', 'is_deleted', 'deleted_at')->find($share->file_id);
+            if (! $file || (bool) $file->is_deleted || $file->deleted_at !== null) {
+                return response()->json(['message' => 'Share not found.'], 404);
+            }
+        }
+        if (! empty($share->folder_id)) {
+            $folder = \App\Models\Folder::select('id', 'is_deleted', 'deleted_at')->find($share->folder_id);
+            if (! $folder || (bool) $folder->is_deleted || $folder->deleted_at !== null) {
+                return response()->json(['message' => 'Share not found.'], 404);
+            }
         }
 
         $sharedBy = DB::table('users')->where('id', $share->shared_by_user_id)->select('id', 'name')->first();

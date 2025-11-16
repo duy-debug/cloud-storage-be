@@ -118,7 +118,11 @@ class PublicLinkService
      */
     public function getActiveByToken(string $token): PublicLink
     {
-        $link = PublicLink::with(['user:id,name', 'file:id,display_name', 'folder:id,folder_name'])->where('token', $token)->first();
+        $link = PublicLink::with([
+            'user:id,name',
+            'file:id,display_name,is_deleted,deleted_at',
+            'folder:id,folder_name,is_deleted,deleted_at',
+        ])->where('token', $token)->first();
         if (! $link) {
             throw new DomainValidationException('Public link not found');
         }
@@ -127,6 +131,25 @@ class PublicLinkService
         }
         if ($link->expired_at !== null && Carbon::now()->greaterThan($link->expired_at)) {
             throw new DomainValidationException('Public link expired');
+        }
+
+        // If the target file/folder has been soft-deleted, consider the link invalid.
+        if ($link->file_id !== null) {
+            if (! $link->file) {
+                throw new DomainValidationException('File not found');
+            }
+            if ((bool) $link->file->is_deleted || $link->file->deleted_at !== null) {
+                throw new DomainValidationException('File not found');
+            }
+        }
+
+        if ($link->folder_id !== null) {
+            if (! $link->folder) {
+                throw new DomainValidationException('Folder not found');
+            }
+            if ((bool) $link->folder->is_deleted || $link->folder->deleted_at !== null) {
+                throw new DomainValidationException('Folder not found');
+            }
         }
         return $link;
     }
@@ -236,8 +259,8 @@ class PublicLinkService
         if ($link->shareable_type !== 'file' || $link->file_id === null) {
             throw new DomainValidationException('Public link is not for a file');
         }
-        // Only allow preview when permission is 'view'
-        if ($link->permission !== 'view') {
+        // Allow preview when permission is 'view' or 'download'
+        if (! in_array($link->permission, ['view', 'download'], true)) {
             throw new DomainValidationException('Public link does not grant required permission');
         }
 

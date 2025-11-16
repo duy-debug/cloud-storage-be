@@ -1,10 +1,10 @@
 @baseUrl = http://localhost:8000
-@token = 20|y4xWD4RXu0vkC19dloofc7Th167rQyMTj71KHxwjd55bcd1f
+@token = 23|InCcMpzHvpzy7nr0NdfixOaSPxuPNjdSlJdpwm5l292b78e2
 @token_other = fdfdsf
-@publicToken = dfsfsdf
+@publicToken = KYrlWVyFFgyvhtEXiBgFG3ucN3UjHUkIK7ppaYpe
 
 ### 1) Happy path — authenticated PDF/image/video/audio preview (200)
-GET {{baseUrl}}/api/files/56/preview
+GET {{baseUrl}}/api/files/58/preview
 Accept: application/json
 Authorization: Bearer {{token}}
 
@@ -13,7 +13,7 @@ Authorization: Bearer {{token}}
 
 // CHUA TEST
 ### 2) Public link — preview via token query (200)
-GET {{baseUrl}}/api/files/42/preview?token={{publicToken}}
+GET {{baseUrl}}/api/files/57/preview?token={{publicToken}}
 Accept: application/json
 
 ### Expect: 200 OK with preview_url (no Authorization header required)

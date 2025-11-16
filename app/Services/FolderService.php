@@ -355,16 +355,32 @@ class FolderService
      */
     private function cascadeSoftDelete(FolderModel $folder): void
     {
-        // Soft delete all files in this folder
+
+        // Soft delete all files in this folder and revoke any shares referencing them
         foreach ($folder->files()->get() as $file) {
             $file->is_deleted = true;
             $file->save();
+
+            // remove shares that reference this file
+            $fileShareIds = DB::table('shares')->where('file_id', $file->id)->pluck('id')->toArray();
+            if (! empty($fileShareIds)) {
+                DB::table('receives_shares')->whereIn('share_id', $fileShareIds)->delete();
+                DB::table('shares')->whereIn('id', $fileShareIds)->delete();
+            }
+
             $file->delete();
         }
 
         // Recurse into children
         foreach ($folder->children()->get() as $child) {
             $this->cascadeSoftDelete($child);
+        }
+
+        // Before marking folder deleted, revoke any shares that reference this folder
+        $folderShareIds = DB::table('shares')->where('folder_id', $folder->id)->pluck('id')->toArray();
+        if (! empty($folderShareIds)) {
+            DB::table('receives_shares')->whereIn('share_id', $folderShareIds)->delete();
+            DB::table('shares')->whereIn('id', $folderShareIds)->delete();
         }
 
         // Mark folder as deleted and soft delete

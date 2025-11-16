@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\BaseApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\File;
+use App\Models\Folder;
 
 class UpdateUserPermissionController extends BaseApiController
 {
@@ -36,6 +38,20 @@ class UpdateUserPermissionController extends BaseApiController
         $share = DB::table('shares')->where('id', $id)->first();
         if (! $share) {
             return response()->json(['success' => false, 'message' => 'Share not found.'], 404);
+        }
+
+        // If the share's target (file/folder) is soft-deleted, return not found
+        if (! empty($share->file_id)) {
+            $file = File::select('id', 'is_deleted', 'deleted_at')->find($share->file_id);
+            if (! $file || (bool) $file->is_deleted || $file->deleted_at !== null) {
+                return response()->json(['success' => false, 'message' => 'Share not found.'], 404);
+            }
+        }
+        if (! empty($share->folder_id)) {
+            $folder = Folder::select('id', 'is_deleted', 'deleted_at')->find($share->folder_id);
+            if (! $folder || (bool) $folder->is_deleted || $folder->deleted_at !== null) {
+                return response()->json(['success' => false, 'message' => 'Share not found.'], 404);
+            }
         }
 
         // Only owner may change recipient permissions

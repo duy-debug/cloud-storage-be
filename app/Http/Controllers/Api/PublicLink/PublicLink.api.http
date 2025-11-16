@@ -2,14 +2,16 @@
 
 @baseUrl=http://localhost:8000
 @json=application/json
-@token=16|R8BmJs9oeiWaQBTncG0Bgq4yW634nFxxwHnngjwH593e3b31
+@token=20|y4xWD4RXu0vkC19dloofc7Th167rQyMTj71KHxwjd55bcd1f
+@otherToken=PUT_ANOTHER_VALID_TOKEN_HERE
 
 @fileId=45
 @folderId=7
+@versionId=3
 
 # Link created in the previous request
 @linkId=43
-@linkToken=UrEnaiQypcpDIXthiF8o4ngr3NDHYsfSvmbxDJHS
+@linkToken=dVc8QtqmNKWEgFhlJIWhoEY6k81y3DrLx87mQb59
 
 ### 8.1. Create public link (file)
 POST {{baseUrl}}/api/public-links
@@ -19,8 +21,8 @@ Content-Type: {{json}}
 
 {
   "shareable_type": "file",
-  "shareable_id": "{{fileId}}",
-  "permission": "download",
+  "shareable_id": "57",
+  "permission": "view",
   "expired_at": null
 }
 
@@ -33,7 +35,7 @@ Content-Type: {{json}}
 
 {
   "shareable_type": "folder",
-  "shareable_id": "{{folderId}}",
+  "shareable_id": "36",
   "permission": "view",
   "expired_at": null
 }
@@ -51,30 +53,30 @@ Accept: {{json}}
 
 
 ### 8.4. Xóa hoặc thu hồi public link
-DELETE {{baseUrl}}/api/public-links/{{linkId}}
+DELETE {{baseUrl}}/api/public-links/1
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
 
 ### 8.5. Update public link
-PUT {{baseUrl}}/api/public-links/44
+PUT {{baseUrl}}/api/public-links/4
 Accept: {{json}}
 Authorization: Bearer {{token}}
 Content-Type: {{json}}
 
 {
-  "permission": "view",
-  "expired_at": "2030-11-01T00:00:00Z"
+  "permission": "download",
+  "expired_at": "2025-12-31T23:59:59Z"
 }
 
 
 ### 8.6. Preview via token
-GET {{baseUrl}}/api/public-links/3zdkyC3neBslxYuB9HLyev43EpdGkCdcbWO9WkJi/preview
+GET {{baseUrl}}/api/public-links/KYrlWVyFFgyvhtEXiBgFG3ucN3UjHUkIK7ppaYpe/preview
 Accept: {{json}}
 
 
 ### 8.7. Download via token (JSON containing download_url)
-GET {{baseUrl}}/api/public-links/WJjmB4rFhJomZ1ntrfHNhEuyx2Wws8axixf5i6cG/download
+GET {{baseUrl}}/api/public-links/rThMYVXfgkQs5ol7TBsBhxY3345eJBMfmAhdTN0s/download
 Accept: {{json}}
 
 
@@ -85,6 +87,256 @@ Authorization: Bearer {{token}}
 
 
 ### 8.9. List public links for file
-GET {{baseUrl}}/api/files/{{fileId}}/public-links
+GET {{baseUrl}}/api/files/58/public-links
 Accept: {{json}}
 Authorization: Bearer {{token}}
+
+
+### --- Additional exhaustive testcases for public-link endpoints ---
+
+### 8.1. Create public link (folder) - Success
+POST {{baseUrl}}/api/public-links
+Accept: {{json}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "shareable_type": "folder",
+  "shareable_id": "36",
+  "permission": "view",
+  "expired_at": null
+}
+# Expected: 201 Created
+
+
+### 8.1.a Create public link (folder) - Unauthenticated (failure)
+POST {{baseUrl}}/api/public-links
+Accept: {{json}}
+Content-Type: {{json}}
+
+{
+  "shareable_type": "folder",
+  "shareable_id": "{{folderId}}",
+  "permission": "view",
+  "expired_at": null
+}
+# Expected: 401 Unauthenticated
+
+
+### 8.1.b Create public link (folder) - Invalid permission (422)
+POST {{baseUrl}}/api/public-links
+Accept: {{json}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "shareable_type": "folder",
+  "shareable_id": "{{folderId}}",
+  "permission": "invalid_perm",
+  "expired_at": null
+}
+# Expected: 422 Validation Error
+
+
+### 8.1.c Create public link (folder) - Folder not found (404)
+POST {{baseUrl}}/api/public-links
+Accept: {{json}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "shareable_type": "folder",
+  "shareable_id": "9999999",
+  "permission": "view",
+  "expired_at": null
+}
+# Expected: 404 Folder not found
+
+### 8.1.d Create public link (folder) - Forbidden (403)
+POST {{baseUrl}}/api/public-links
+Accept: {{json}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "shareable_type": "file",
+  "shareable_id": "54",
+  "permission": "view",
+  "expired_at": null
+}
+
+
+### 8.2. List my public links - Success
+GET {{baseUrl}}/api/public-links?page=1&per_page=20
+Accept: {{json}}
+Authorization: Bearer {{token}}
+# Expected: 200 OK
+
+
+### 8.2.a List my public links - Unauthenticated (failure)
+GET {{baseUrl}}/api/public-links?page=1&per_page=20
+Accept: {{json}}
+# Expected: 401 Unauthenticated
+
+
+### 8.3. Get public link info - Success (use a real token)
+GET {{baseUrl}}/api/public-links/{{linkToken}}
+Accept: {{json}}
+# Expected: 200 OK (public link metadata)
+
+
+### 8.3.a Get public link info - Invalid token (404)
+GET {{baseUrl}}/api/public-links/INVALID_TOKEN_123
+Accept: {{json}}
+# Expected: 404 PUBLIC_LINK_NOT_FOUND
+
+
+### 8.3.b Get public link info - Revoked/Expired (403)
+### To test: use a revoked or expired token
+GET {{baseUrl}}/api/public-links/7qDWsYOE3VQElXoRdS4rbwwQUzzmacGo00UNk8yW
+Accept: {{json}}
+# Expected: 403 FORBIDDEN when token revoked or expired
+
+
+### 8.4. Delete public link (auth) - Success
+DELETE {{baseUrl}}/api/public-links/{{linkId}}
+Accept: {{json}}
+Authorization: Bearer {{token}}
+# Expected: 200 OK
+
+
+### 8.4.a Delete public link - Unauthenticated (401)
+DELETE {{baseUrl}}/api/public-links/{{linkId}}
+Accept: {{json}}
+# Expected: 401 Unauthenticated
+
+
+### 8.4.b Delete public link - Not found (404)
+DELETE {{baseUrl}}/api/public-links/9999999
+Accept: {{json}}
+Authorization: Bearer {{token}}
+# Expected: 404 PUBLIC_LINK_NOT_FOUND
+
+
+### 8.4.c Delete public link - Forbidden (403)
+### To test: call with a token belonging to a non-owner user
+DELETE {{baseUrl}}/api/public-links/{{linkId}}
+Accept: {{json}}
+Authorization: Bearer {{otherToken}}
+# Expected: 403 FORBIDDEN
+
+
+### 8.5. Update public link - Success
+PUT {{baseUrl}}/api/public-links/2
+Accept: {{json}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "permission": "download",
+  "expired_at": "2025-12-31T23:59:59Z"
+}
+# Expected: 200 OK
+
+
+### 8.5.a Update public link - Validation error (422)
+PUT {{baseUrl}}/api/public-links/{{linkId}}
+Accept: {{json}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "permission": "not_a_valid",
+  "expired_at": "not-a-date"
+}
+# Expected: 422 VALIDATION_ERROR
+
+
+### 8.5.b Update public link - Not found (404)
+PUT {{baseUrl}}/api/public-links/9999999
+Accept: {{json}}
+Authorization: Bearer {{token}}
+Content-Type: {{json}}
+
+{
+  "permission": "view"
+}
+# Expected: 404 PUBLIC_LINK_NOT_FOUND
+
+
+### 8.6. Preview via token - Success (permission=view)
+GET {{baseUrl}}/api/public-links/OBOnHuWnhJmPbrGOwNRUfBx92UHHR06Jxt01xhjG/preview
+Accept: {{json}}
+# Expected: 200 OK (preview data)
+
+
+### 8.6.a Preview via token - Permission denied (403)
+### If token has permission=download only, current code denies preview
+GET {{baseUrl}}/api/public-links/OBOnHuWnhJmPbrGOwNRUfBx92UHHR06Jxt01xhjG/preview
+Accept: {{json}}
+# Expected: 403 FORBIDDEN if token lacks view permission
+
+
+### 8.6.b Preview - Invalid token (404)
+GET {{baseUrl}}/api/public-links/INVALID_PREVIEW_TOKEN/preview
+Accept: {{json}}
+# Expected: 404 PUBLIC_LINK_NOT_FOUND
+
+
+### 8.7. Download via token - Get download_url
+GET {{baseUrl}}/api/public-links/OBOnHuWnhJmPbrGOwNRUfBx92UHHR06Jxt01xhjG/download
+Accept: {{json}}
+# Expected: 200 OK with `download_url`
+
+
+### 8.7.a Download via token - Permission denied (403)
+GET {{baseUrl}}/api/public-links/OBOnHuWnhJmPbrGOwNRUfBx92UHHR06Jxt01xhjG/download
+Accept: {{json}}
+# Expected: 403 FORBIDDEN if token lacks download permission
+
+
+### 8.7.b Download via token - Invalid token (404)
+GET {{baseUrl}}/api/public-links/INVALID_DOWNLOAD_TOKEN/download
+Accept: {{json}}
+# Expected: 404 PUBLIC_LINK_NOT_FOUND
+
+
+### 8.8. Revoke via POST - Success (auth)
+POST {{baseUrl}}/api/public-links/7/revoke
+Accept: {{json}}
+Authorization: Bearer {{token}}
+# Expected: 200 OK
+
+
+### 8.8.a Revoke via POST - Unauthenticated (401)
+POST {{baseUrl}}/api/public-links/{{linkId}}/revoke
+Accept: {{json}}
+# Expected: 401 UNAUTHENTICATED
+
+
+### 8.9. List public links for file - Success
+GET {{baseUrl}}/api/files/54/public-links
+Accept: {{json}}
+Authorization: Bearer {{token}}
+# Expected: 200 OK
+
+
+### 8.9.a List public links for file - Unauthenticated (401)
+GET {{baseUrl}}/api/files/{{fileId}}/public-links
+Accept: {{json}}
+# Expected: 401 UNAUTHENTICATED
+
+
+### 8.9.b List public links for file - File not found (404)
+GET {{baseUrl}}/api/files/9999999/public-links
+Accept: {{json}}
+Authorization: Bearer {{token}}
+# Expected: 404 FILE_NOT_FOUND
+
+
+### 8.9.c List public links for file - Forbidden (403)
+### To test: call with token of user who does not own the file
+GET {{baseUrl}}/api/files/58/public-links
+Accept: {{json}}
+Authorization: Bearer {{token}}
+# Expected: 403 FORBIDDEN

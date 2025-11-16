@@ -29,8 +29,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/files', [\App\Http\Controllers\Api\File\FileController::class, 'store']);
     Route::get('/files', [\App\Http\Controllers\Api\File\FileController::class, 'index']);
     Route::get('/files/recent', [\App\Http\Controllers\Api\File\FileController::class, 'recent']);
-    Route::get('/files/shared-with-me', [\App\Http\Controllers\Api\File\FileController::class, 'sharedWithMe']);
-    Route::get('/files/shared-by-me', [\App\Http\Controllers\Api\File\FileController::class, 'sharedByMe']);
+    // Route::get('/files/shared-with-me', [\App\Http\Controllers\Api\File\FileController::class, 'sharedWithMe']);
+    // Route::get('/files/shared-by-me', [\App\Http\Controllers\Api\File\FileController::class, 'sharedByMe']);
     Route::put('/files/{id}', [\App\Http\Controllers\Api\File\FileController::class, 'update']);
     Route::delete('/files/{id}', [\App\Http\Controllers\Api\File\FileController::class, 'destroy']);
     
@@ -48,8 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Trash
     Route::get('/trash', [\App\Http\Controllers\Api\Trash\CombinedTrashController::class, 'index']);
     Route::get('/trash/folders/{id}/contents', [\App\Http\Controllers\Api\Trash\CombinedTrashController::class, 'folderContents']);
-    Route::get('/trash/files', [\App\Http\Controllers\Api\Trash\TrashController::class, 'files']);
-    Route::get('/trash/folders', [\App\Http\Controllers\Api\Trash\TrashController::class, 'folders']);
+    // Route::get('/trash/files', [\App\Http\Controllers\Api\Trash\TrashController::class, 'files']);
+    // Route::get('/trash/folders', [\App\Http\Controllers\Api\Trash\TrashController::class, 'folders']);
     Route::post('/trash/{id}/restore', [\App\Http\Controllers\Api\Trash\RestoreTrashController::class, 'restore']);
     // specific route for emptying trash must come before the generic /trash/{id} route
     Route::delete('/trash/empty', [\App\Http\Controllers\Api\Trash\EmptyTrashController::class, 'emptyTrash']);
@@ -70,11 +70,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/shares', [\App\Http\Controllers\Api\Share\ListSharesController::class, 'index']);
     Route::get('/shares/received', [\App\Http\Controllers\Api\Share\ReceivedSharesController::class, 'index']);
     Route::get('/shares/{id}', [\App\Http\Controllers\Api\Share\GetShareController::class, 'show']);
-    Route::put('/shares/{id}', [\App\Http\Controllers\Api\Share\UpdateSharePermissionController::class, 'update']);
+    // Route::put('/shares/{id}', [\App\Http\Controllers\Api\Share\UpdateSharePermissionController::class, 'update']);
     Route::delete('/shares/{id}', [\App\Http\Controllers\Api\Share\DeleteShareController::class, 'destroy']);
-    Route::post('/shares/{id}/users', [\App\Http\Controllers\Api\Share\AddUsersToShareController::class, 'store']);
+    // Route::post('/shares/{id}/users', [\App\Http\Controllers\Api\Share\AddUsersToShareController::class, 'store']);
     Route::delete('/shares/{id}/users/{userId}', [\App\Http\Controllers\Api\Share\RemoveUserFromShareController::class, 'destroy']);
-    Route::put('/shares/{id}/users/{userId}', [\App\Http\Controllers\Api\Share\UpdateUserPermissionController::class, 'update']);
+    // Route::put('/shares/{id}/users/{userId}', [\App\Http\Controllers\Api\Share\UpdateUserPermissionController::class, 'update']);
 
     // Storage
     Route::get('/storage/breakdown', [\App\Http\Controllers\Api\Storage\StorageBreakdownController::class, 'breakdown']);
@@ -88,8 +88,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bulk/bulk-delete', [\App\Http\Controllers\Api\Bulk\BulkController::class, 'bulkDelete']);
     Route::post('/bulk/bulk-move', [\App\Http\Controllers\Api\Bulk\BulkController::class, 'bulkMove']);
     Route::post('/bulk/bulk-copy', [\App\Http\Controllers\Api\Bulk\BulkController::class, 'bulkCopy']);
-    Route::post('/bulk/bulk-share', [\App\Http\Controllers\Api\Bulk\BulkController::class, 'bulkShare']);
-    Route::post('/bulk/bulk-download', [\App\Http\Controllers\Api\Bulk\BulkController::class, 'bulkDownload']);
+    // Route::post('/bulk/bulk-share', [\App\Http\Controllers\Api\Bulk\BulkController::class, 'bulkShare']);
+    // Route::post('/bulk/bulk-download', [\App\Http\Controllers\Api\Bulk\BulkController::class, 'bulkDownload']);
 });
 
 // Public links (no auth)
@@ -162,7 +162,7 @@ Route::middleware(['auth:sanctum', 'can:admin']) // TODO: replace with actual ad
         Route::get('/stats/users', [\App\Http\Controllers\Api\Admin\AdminDashboardController::class, 'users']);
         Route::get('/stats/files', [\App\Http\Controllers\Api\Admin\AdminDashboardController::class, 'files']);
         Route::get('/stats/storage', [\App\Http\Controllers\Api\Admin\AdminDashboardController::class, 'storage']);
-        Route::get('/stats/activity', [\App\Http\Controllers\Api\Admin\AdminDashboardController::class, 'activity']);
+        // Route::get('/stats/activity', [\App\Http\Controllers\Api\Admin\AdminDashboardController::class, 'activity']);
     });
 
 // Auth (Bearer token via Sanctum Personal Access Tokens)

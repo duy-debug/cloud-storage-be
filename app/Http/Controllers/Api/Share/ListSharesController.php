@@ -28,6 +28,18 @@ class ListSharesController extends BaseApiController
             ->leftJoin('folders as fo', 'sh.folder_id', '=', 'fo.id')
             ->leftJoin('receives_shares as rs', 'rs.share_id', '=', 'sh.id')
             ->where('sh.user_id', $user->id)
+            // Exclude shares whose target file or folder has been soft-deleted
+            ->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->whereNotNull('sh.file_id')
+                        ->where('f.is_deleted', false)
+                        ->whereNull('f.deleted_at');
+                })->orWhere(function ($q3) {
+                    $q3->whereNotNull('sh.folder_id')
+                        ->where('fo.is_deleted', false)
+                        ->whereNull('fo.deleted_at');
+                });
+            })
             ->selectRaw(
                 'sh.id as share_id, sh.shareable_type, COALESCE(f.display_name, fo.folder_name) as shareable_name, sh.created_at, COUNT(DISTINCT rs.user_id) as shared_with_count'
             )

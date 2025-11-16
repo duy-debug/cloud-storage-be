@@ -101,11 +101,45 @@ class AdminDashboardService
         ];
     }
 
-    public function storage(): array
+    public function storage(?string $startDate = null, ?string $endDate = null): array
     {
-        $days = 30;
-        $start = Carbon::now()->subDays($days - 1)->startOfDay();
-        $raw = FileVersion::where('created_at', '>=', $start)
+        if ($startDate !== null || $endDate !== null) {
+            $start = $startDate ? Carbon::parse($startDate)->startOfDay() : null;
+            $end = $endDate ? Carbon::parse($endDate)->startOfDay() : null;
+
+            if ($start === null && $end !== null) {
+                $start = $end;
+            }
+            if ($end === null && $start !== null) {
+                $end = $start;
+            }
+
+            if ($start === null || $end === null) {
+                // fallback to last 30 days if parsing failed somehow
+                $days = 30;
+                $start = Carbon::now()->subDays($days - 1)->startOfDay();
+                $end = Carbon::now()->startOfDay();
+            } else {
+                if ($start->greaterThan($end)) {
+                    [$start, $end] = [$end, $start];
+                }
+
+                $days = $start->diffInDays($end) + 1;
+            }
+        } else {
+            $days = 30;
+            $start = Carbon::now()->subDays($days - 1)->startOfDay();
+            $end = Carbon::now()->startOfDay();
+        }
+
+        // cap the range to a reasonable maximum to avoid very large queries
+        $maxDays = 366;
+        if ($days > $maxDays) {
+            $start = $end->copy()->subDays($maxDays - 1)->startOfDay();
+            $days = $maxDays;
+        }
+
+        $raw = FileVersion::whereBetween('created_at', [$start, $end->endOfDay()])
             ->select(DB::raw('DATE(created_at) as d'), DB::raw('SUM(file_size) as bytes'))
             ->groupBy('d')
             ->orderBy('d')

@@ -2,25 +2,25 @@
 
 @base=http://localhost:8000
 @json=application/json
-@token=5|MVJJWbz0KG3mHZ13SLAxcHldwthhen3xXVkhs92y9bf1e07b
-@folderId=11
+@token=20|y4xWD4RXu0vkC19dloofc7Th167rQyMTj71KHxwjd55bcd1f
+@folderId=34
 
 ### 1) Unauthenticated - should return 401
 GET {{base}}/api/trash/folders/{{folderId}}/contents
 Accept: {{json}}
 
 ### 2) Get folder contents (authenticated) - success
-GET {{base}}/api/trash/folders/{{folderId}}/contents
+GET {{base}}/api/trash/folders/34/contents
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
 ### 3) Search within trashed folder
-GET {{base}}/api/trash/folders/{{folderId}}/contents?search=invoice
+GET {{base}}/api/trash/folders/{{folderId}}/contents?search=b
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
 ### 4) Pagination - page 2, 1 item per page
-GET {{base}}/api/trash/folders/{{folderId}}/contents?page=1&per_page=2
+GET {{base}}/api/trash/folders/{{folderId}}/contents?page=1&per_page=3
 Accept: {{json}}
 Authorization: Bearer {{token}}
 

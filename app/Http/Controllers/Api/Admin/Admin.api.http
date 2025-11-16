@@ -2,7 +2,7 @@
 
 @base=http://localhost:8000
 @json=application/json
-@token=YOUR_ADMIN_TOKEN_HERE
+@token=14|849x59nB9k5iFZNTugiPTSvrnJGAJ4WzVmkniSmA528a12d8
 
 ### List users
 GET {{base}}/api/admin/users
@@ -52,23 +52,62 @@ GET {{base}}/api/admin/dashboard
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
+### Admin dashboard (unauthenticated)
+GET {{base}}/api/admin/dashboard
+Accept: {{json}}
+
+
 ### 13.2. Thống kê người dùng
 GET {{base}}/api/admin/stats/users
 Accept: {{json}}
 Authorization: Bearer {{token}}
+
+### Thống kê người dùng (unauthenticated)
+GET {{base}}/api/admin/stats/users
+Accept: {{json}}
+
 
 ### 13.3. Thống kê files
 GET {{base}}/api/admin/stats/files
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
+### Thống kê files (unauthenticated)
+GET {{base}}/api/admin/stats/files
+Accept: {{json}}
+
+
 ### 13.4. Thống kê dung lượng
 GET {{base}}/api/admin/stats/storage
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
+### Thống kê dung lượng (unauthenticated)
+GET {{base}}/api/admin/stats/storage
+Accept: {{json}}
+
+### Thống kê dung lượng (with date range)
+GET {{base}}/api/admin/stats/storage?start_date=2025-10-25&end_date=2025-10-31
+Accept: {{json}}
+Authorization: Bearer {{token}}
+
+### Thống kê dung lượng (single day)
+GET {{base}}/api/admin/stats/storage?start_date=2025-10-15
+Accept: {{json}}
+Authorization: Bearer {{token}}
+
+### Thống kê dung lượng (invalid date -> 500)
+GET {{base}}/api/admin/stats/storage?start_date=2025-13-01
+Accept: {{json}}
+Authorization: Bearer {{token}}
+
+
 ### 13.5. Hoạt động hệ thống
 GET {{base}}/api/admin/stats/activity?page=1&per_page=10
 Accept: {{json}}
 Authorization: Bearer {{token}}
+
+### Hoạt động hệ thống (unauthenticated)
+GET {{base}}/api/admin/stats/activity?page=1&per_page=10
+Accept: {{json}}
 
