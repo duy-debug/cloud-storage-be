@@ -2,7 +2,7 @@
 
 @base=http://localhost:8000
 @json=application/json
-@token=12|hnHGua27fNRfqoZInLd6kAlk6rppErSbR5Ur03qd56a5f074
+@token=25|aFInVPRqMh7Tu907ZbSIs8Mj5NATzhBheKBPzkXAae90f0b8
 
 ############################################################
 ### 1) DANH SÁCH CONFIGS - GET /api/admin/configs
@@ -14,7 +14,7 @@ Accept: {{json}}
 Authorization: Bearer {{token}}
 
 ### 1.2) Đường đi đẹp — tìm kiếm theo config_key hoặc config_value
-GET {{base}}/api/admin/configs?search=max_file_size
+GET {{base}}/api/admin/configs?search=max_upload_size
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
@@ -32,7 +32,7 @@ Accept: {{json}}
 ############################################################
 
 ### 2.1) Đường đi đẹp — config_key tồn tại
-GET {{base}}/api/admin/configs/max_file_size
+GET {{base}}/api/admin/configs/max_upload_size
 Accept: {{json}}
 Authorization: Bearer {{token}}
 
@@ -42,7 +42,7 @@ Accept: {{json}}
 Authorization: Bearer {{token}}
 
 ### 2.3) Chưa đăng nhập — 401
-GET {{base}}/api/admin/configs/max_file_size
+GET {{base}}/api/admin/configs/max_upload_size
 Accept: {{json}}
 
 ############################################################
@@ -96,13 +96,13 @@ Content-Type: {{json}}
 ############################################################
 
 ### 4.1) Đường đi đẹp — cập nhật config đã tồn tại
-PUT {{base}}/api/admin/configs/max_file_size
+PUT {{base}}/api/admin/configs/max_upload_size
 Accept: {{json}}
 Authorization: Bearer {{token}}
 Content-Type: {{json}}
 
 {
-  "config_value": "209715200"
+  "config_value": "52428800"
 }
 
 ### 4.2) Lỗi validate — thiếu config_value (422)
