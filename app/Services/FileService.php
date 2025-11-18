@@ -246,7 +246,7 @@ class FileService
 			throw new \App\Exceptions\DomainValidationException('File size exceeds max_upload_size');
 		}
 
-		return DB::transaction(function () use ($user, $file, $uploadedFile, $size, $mime, $ext, $action, $notes) {
+		return DB::transaction(function () use ($user, $file, $uploadedFile, $size, $mime, $ext, $action, $notes, $owner) {
 			// Determine next version number
 			$last = $file->versions()->orderByDesc('version_number')->first();
 			$nextVersion = $last ? ($last->version_number + 1) : 1;
